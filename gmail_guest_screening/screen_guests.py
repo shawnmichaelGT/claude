@@ -30,10 +30,30 @@ MAX_EMAILS = 20
 BODY_CHAR_LIMIT = 4000
 
 SCREENING_PROMPT = """\
-You are screening podcast guest inquiry emails. Evaluate the email against these three criteria:
-1. Relevant expertise / topic fit — does their background match a podcast's theme?
-2. Clear pitch or hook — did they articulate why they'd make a compelling episode?
-3. Social / media presence — do they have an audience, following, or published work?
+You are screening potential guests for Beyond the Boost (BTB), a podcast hosted by \
+Shawn Michael (Identity Disruptor). The show is NOT a general success or achievement \
+podcast. It is specifically about identity-level transformation — who someone had to \
+STOP BEING to become who they are now. Behavior and strategy are downstream. \
+The show lives upstream, at self-concept.
+
+Evaluate this email against these BTB-specific criteria:
+
+GREEN FLAGS (positive signals):
+- Story centers on an internal identity shift, not just external results
+- They can articulate who they had to stop being, not just what they built
+- Transformation language is earned and unpolished, not PR-packaged
+- Somatic, nervous system, consciousness, or self-concept frameworks present
+- Story has texture — doubt, resistance, loss — not a clean arc
+
+RED FLAGS (likely pass):
+- Achievement arc only — what they built, won, or overcame externally
+- Financial strategy, health media, or tactical business angle
+- Clinical or behavioral framing (therapist/treatment language without identity depth)
+- Motivational speaker energy — polished, hype-adjacent, outcome-focused
+- Primary goal appears to be visibility/promotion for their own platform
+- Transformation located in external circumstances, not internal self-concept shift
+
+THE CORE TEST: Is this a shedding story or a success story?
 
 Email to evaluate:
 Subject: {subject}
@@ -46,10 +66,12 @@ Respond with ONLY a valid JSON object (no markdown fences) in this exact shape:
 {{
   "verdict": "strong_fit" | "possible_fit" | "not_a_fit",
   "score": <integer 1-10>,
-  "strengths": ["...", "..."],
-  "concerns": ["...", "..."],
-  "summary": "<2-3 sentence plain-text assessment>",
-  "suggested_reply": "<professional draft reply in plain text — warm interest + clarifying questions for fits; polite decline for not_a_fit>"
+  "identity_depth": "high" | "medium" | "low",
+  "story_type": "shedding_arc" | "achievement_arc" | "unclear",
+  "red_flags": ["...", "..."],
+  "green_flags": ["...", "..."],
+  "summary": "<2-3 sentence plain-text assessment focused on identity depth, not credentials>",
+  "suggested_reply": "<reply in Shawn's voice — warm but direct, signed 'With strength and heart, Shawn Michael' — clarifying questions for fits; warm decline for not_a_fit>"
 }}
 """
 
@@ -187,7 +209,7 @@ def main():
     service = get_gmail_service()
     screened_label_id = get_or_create_label(service, SCREENED_LABEL)
 
-    query = f"is:unread in:inbox -label:{SCREENED_LABEL}"
+    query = f"label:1--daily-power-boost-pending-reply -label:{SCREENED_LABEL}"
     result = service.users().messages().list(
         userId="me", q=query, maxResults=MAX_EMAILS
     ).execute()
