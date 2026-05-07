@@ -187,7 +187,7 @@ def main():
     service = get_gmail_service()
     screened_label_id = get_or_create_label(service, SCREENED_LABEL)
 
-    query = f"is:unread in:inbox -label:{SCREENED_LABEL}"
+    query = f"label:1--daily-power-boost-pending-reply -label:{SCREENED_LABEL}"
     result = service.users().messages().list(
         userId="me", q=query, maxResults=MAX_EMAILS
     ).execute()
