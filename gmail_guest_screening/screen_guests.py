@@ -76,9 +76,14 @@ Respond with ONLY a valid JSON object (no markdown fences) in this exact shape:
 """
 
 
+def _b64decode(value: str) -> bytes:
+    value = value.strip()
+    return base64.b64decode(value + "=" * (-len(value) % 4))
+
+
 def get_gmail_service() -> object:
-    token_data = json.loads(base64.b64decode(os.environ["GMAIL_TOKEN_JSON"]))
-    creds_data = json.loads(base64.b64decode(os.environ["GMAIL_CREDS_JSON"]))
+    token_data = json.loads(_b64decode(os.environ["GMAIL_TOKEN_JSON"]))
+    creds_data = json.loads(_b64decode(os.environ["GMAIL_CREDS_JSON"]))
 
     creds = Credentials(
         token=token_data.get("token"),
